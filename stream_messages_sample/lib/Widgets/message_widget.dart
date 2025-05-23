@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:stream_messages_sample/Data/Model/Message.dart';
+import 'package:stream_messages_sample/Data/Model/message.dart';
 
 class MessageWidget extends StatelessWidget {
   const MessageWidget({super.key, required this.message});
