@@ -1,26 +1,67 @@
 import 'package:flutter/material.dart';
-import 'package:stream_messages_sample/Data/Model/Message.dart';
+import 'package:stream_messages_sample/Data/Model/message.dart';
+import 'package:stream_messages_sample/ViewModel/messages_view_model.dart';
 import 'package:stream_messages_sample/Widgets/message_widget.dart';
 
-class MessageListView extends StatelessWidget {
-  const MessageListView({super.key});
+class MessageListView extends StatefulWidget {
+  const MessageListView({super.key, required this.viewModel});
+
+  final MessagesViewModel viewModel;
+
+  @override
+  State<MessageListView> createState() => _MessageListViewState();
+}
+
+class _MessageListViewState extends State<MessageListView> {
+  final _scrollController = ScrollController();
+  final GlobalKey<AnimatedListState> _animatedListKey = GlobalKey();
+
+  @override
+  void initState() {
+    widget.viewModel.addListener(_scrollToNewMessage);
+    super.initState();
+  }
+
+  void _scrollToNewMessage() {
+    if (!_scrollController.hasClients || widget.viewModel.messages.isEmpty) {
+      return;
+    }
+    final index = widget.viewModel.messages.length - 1;
+
+    _animatedListKey.currentState?.insertItem(index);
+
+    _scrollController.animateTo(
+      _scrollController.position.maxScrollExtent,
+      duration: Duration(milliseconds: 200),
+      curve: Curves.bounceIn,
+    );
+  }
+
+  @override
+  void dispose() {
+    widget.viewModel.removeListener(_scrollToNewMessage);
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
-    final messages = List.generate(
-      10,
-      (idx) => Message(
-        id: idx,
-        primaryText: "Remote -> $idx",
-        secondaryText: "Network Message",
-      ),
-    );
-    return ListView.builder(
-      itemCount: messages.length,
-      itemBuilder: (context, index) {
-        final message = messages[index];
-        return MessageCell(message: message, index: index);
-      },
+    return ListenableBuilder(
+      listenable: widget.viewModel,
+      builder:
+          (context, child) => AnimatedList(
+            key: _animatedListKey,
+            physics: const BouncingScrollPhysics(),
+            controller: _scrollController,
+            initialItemCount: widget.viewModel.messages.length,
+            itemBuilder: (context, index, animation) {
+              final message = widget.viewModel.messages[index];
+              return SizeTransition(
+                sizeFactor: animation,
+                axisAlignment: 0.0,
+                child: MessageCell(message: message, index: index),
+              );
+            },
+          ),
     );
   }
 }
