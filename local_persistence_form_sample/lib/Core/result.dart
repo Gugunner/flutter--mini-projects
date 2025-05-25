@@ -1,5 +1,5 @@
-typedef AsyncResultFunction<T> =
-    Future<Result<T?, Error>> Function(dynamic input);
+typedef AsyncResultFunction<T, E extends Error> =
+    Future<Result<T?, E>> Function(Map<String, Object?>);
 
 sealed class Result<T, E extends Error> {}
 
@@ -13,4 +13,3 @@ final class Failure<T, E extends Error> extends Result<T, E> {
   final String? message;
   Failure(this.error, [this.message]);
 }
-
