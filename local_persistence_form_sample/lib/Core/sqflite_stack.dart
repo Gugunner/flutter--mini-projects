@@ -94,8 +94,8 @@ extension SqfliteStackUserStorage on SqfliteStack {
     Duration timeAgo = const Duration(seconds: 60),
   }) async {
     final curDate = DateTime.now();
-    final oneMinuteAgo = curDate.subtract(timeAgo);
-    final timestamp = oneMinuteAgo.millisecondsSinceEpoch;
+    final startDate = curDate.subtract(timeAgo);
+    final timestamp = startDate.millisecondsSinceEpoch;
     debugPrint("Getting raw users");
     final rawUsers = await _database?.query(
       UserModel.tableName,
