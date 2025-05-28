@@ -59,15 +59,14 @@ final class SqfliteStack {
 }
 
 extension SqfliteStackUserStorage on SqfliteStack {
-  Future<void> deleteUser(String userId) async {
+  Future<int> deleteUser(String userId) async {
+    debugPrint("Deleting a user $userId");
     final deleteCount = await _database?.delete(
       UserModel.tableName,
       where: "${UserModel.columnId} = ?",
       whereArgs: [userId],
     );
-    if ((deleteCount ?? 0) > 0) {
-      debugPrint("Deleted user $userId");
-    }
+    return deleteCount ?? 0;
   }
 
   Future<int> save(UserModel user) async {
@@ -91,11 +90,13 @@ extension SqfliteStackUserStorage on SqfliteStack {
     return storeCount;
   }
 
-  Future<List<UserModel>?> fetchUsersFromOneWeek() async {
+  Future<List<UserModel>?> fetchUsersFrom({
+    Duration timeAgo = const Duration(seconds: 60),
+  }) async {
     final curDate = DateTime.now();
-    final oneWeekDate = curDate.subtract(Duration(seconds: 7 * 24 * 60 * 60));
-    final timestamp = oneWeekDate.millisecondsSinceEpoch;
-
+    final oneMinuteAgo = curDate.subtract(timeAgo);
+    final timestamp = oneMinuteAgo.millisecondsSinceEpoch;
+    debugPrint("Getting raw users");
     final rawUsers = await _database?.query(
       UserModel.tableName,
       where: '${UserModel.columnTimestamp} <= ?',
